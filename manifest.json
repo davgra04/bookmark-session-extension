@@ -1,10 +1,13 @@
 {
-  "name": "save session",
+  "name": "Bookmark Session",
   "version": "1.0",
-  "description": "saves your session",
-  "permissions": ["tabs", "bookmarks"],
+  "description": "Bookmarks your session",
+  "permissions": [
+    "tabs",
+    "bookmarks"
+  ],
   "browser_action": {
-    "default_title": "Save Session",
+    "default_title": "Bookmark Session",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "images/icon16.png",
@@ -19,5 +22,11 @@
     "48": "images/icon48.png",
     "128": "images/icon128.png"
   },
-  "manifest_version": 2
+  "manifest_version": 2,
+  "web_accessible_resources": [
+    "images/icon16.png",
+    "images/icon32.png",
+    "images/icon48.png",
+    "images/icon128.png"
+  ]
 }

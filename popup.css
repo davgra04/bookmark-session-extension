@@ -1,0 +1,27 @@
+button {
+    font-size: 12pt;
+    height: 32pt;
+    width: 300pt;
+    outline: none;
+}
+
+#loggingDiv {
+    padding: 0.5rem;
+}
+
+.logMessageDiv {
+    display: flex;
+    /* vertical-align: middle; */
+    align-items: center;
+    padding: 0.2rem;
+}
+
+.bookmarkImage {
+    width: 1rem;
+    padding-right: 0.5rem;
+}
+
+.message {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: smaller;
+}

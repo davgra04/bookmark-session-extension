@@ -1,71 +1,71 @@
-
 "use strict";
-
-var date;
-
-
-function pad(num, size) {
-
-    if (size - num.length > 8) {
-
-        size = num.length + 1
-    }
-    var s = "00000000" + num;
-    return s.substr(s.length - size);
-}
 
 
 function formattedDate(date) {
+    let dayStr = String(date.getDate()).padStart(2, "0");
+    let monthStr = String(date.getMonth() + 1).padStart(2, "0");
+    let yearStr = String(date.getFullYear());
 
-    var dayOfWeekNames = [
-        "Sun",
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat"
-    ]
+    let dateFmtOpts = {
+        weekday: "short"
+    };
+    let dayOfWeekStr = new Intl.DateTimeFormat("en-US", dateFmtOpts).format(date);
 
-    var day = date.getDate();
-    var month = date.getMonth() + 1;
-    var year = date.getFullYear();
-    var dayOfWeek = date.getDay();
-
-    return year + "-" + pad(month, 2) + "-" + pad(day, 2) + " (" + dayOfWeekNames[dayOfWeek] + ")";
+    return `${yearStr}-${monthStr}-${dayStr} (${dayOfWeekStr})`;
 }
 
 
-function log(msg) {
-    document.getElementById("message").innerHTML += "<br>" + msg;
+function log(message, includeImage = false) {
+
+    let messageDiv = document.createElement("div");
+    messageDiv.className = "logMessageDiv";
+
+
+
+    if (includeImage) {
+        let img = document.createElement("img");
+        img.src = browser.runtime.getURL("images/icon32.png");
+        img.className = "bookmarkImage";
+        messageDiv.appendChild(img);
+
+        // let imgUrl = browser.runtime.getURL("images/icon32.png");
+        // htmlToAppend += `<img class="bookmarkImage" src="${imgUrl}">`;
+    }
+
+    let messageText = document.createElement("span");
+    messageText.innerText = message;
+    messageText.className = "message";
+    messageDiv.appendChild(messageText);
+    // // htmlToAppend += message
+    // messageDiv.innerText += message;
+
+    loggingDiv.append(messageDiv);
 }
 
 
 function bookmarkTabs(windows, sessionFolder, windowFolder) {
 
-    var win = windows[0];
+    let win = windows[0];
 
-    chrome.tabs.query({ windowId: win.id }, function (arrayOfTabs) {
+    browser.tabs.query({
+        windowId: win.id
+    }, function (arrayOfTabs) {
 
         // create bookmarks for tabs in window
-        for (var i = 0; i < arrayOfTabs.length; i++) {
-            chrome.bookmarks.create(
-                {
-                    "parentId": windowFolder.id,
-                    "url": arrayOfTabs[i].url,
-                    "title": arrayOfTabs[i].title
-                }
-            );
+        for (let i = 0; i < arrayOfTabs.length; i++) {
+            browser.bookmarks.create({
+                "parentId": windowFolder.id,
+                "url": arrayOfTabs[i].url,
+                "title": arrayOfTabs[i].title
+            });
         }
 
-        log("bookmarked " + arrayOfTabs.length + " tabs for " + windowFolder.title);
+        log(`bookmarked ${arrayOfTabs.length} tabs for ${windowFolder.title}`, true);
 
         if (windows.length == 1) {
-
-            return
+            return;
         } else {
-
-            windows.shift()
+            windows.shift();
             createWindowFolders(windows, sessionFolder);
         }
 
@@ -76,13 +76,14 @@ function bookmarkTabs(windows, sessionFolder, windowFolder) {
 
 function createWindowFolders(windows, sessionFolder) {
 
-    var win = windows[0];
-    var myTitle = "Window " + String(win.id);
+    let win = windows[0];
+    let windowFolderName = "Window " + String(win.id);
 
-    chrome.bookmarks.create(
-        { "parentId": sessionFolder.id, "title": myTitle },
+    browser.bookmarks.create({
+            "parentId": sessionFolder.id,
+            "title": windowFolderName
+        },
         function (windowFolder) {
-            // log("    created folder " + myTitle)
             bookmarkTabs(windows, sessionFolder, windowFolder);
         }
     );
@@ -91,7 +92,7 @@ function createWindowFolders(windows, sessionFolder) {
 
 
 function getAllWindows(yearFolder) {
-    chrome.windows.getAll(function (windows) {
+    browser.windows.getAll(function (windows) {
         createWindowFolders(windows, yearFolder);
     });
 }
@@ -99,52 +100,58 @@ function getAllWindows(yearFolder) {
 
 function createSessionFolder(yearFolder) {
 
-    var myTitle = formattedDate(date) + " Session";
+    let sessionFolderName = formattedDate(date) + " Session";
 
     // Get the current session folder
-    chrome.bookmarks.search({ title: myTitle, "url": undefined }, function (results) {
+    browser.bookmarks.search({
+        title: sessionFolderName,
+        "url": undefined
+    }, function (results) {
 
         if (results.length == 0) {
-
             // create current session folder
-            log("current session folder doesn't exist. Creating...")
+            log(`creating folder "${sessionFolderName}"`);
 
-            chrome.bookmarks.create(
-                { "parentId": yearFolder.id, "title": myTitle },
+            browser.bookmarks.create({
+                    "parentId": yearFolder.id,
+                    "title": sessionFolderName
+                },
                 getAllWindows
             );
 
         } else {
-
             getAllWindows(results[0]);
         }
-    })
-
+    });
 
 }
 
 
 function createYearFolder(pastSessionsFolder) {
 
-    var myTitle = String(date.getFullYear() + " Sessions");
+    let year = date.getFullYear()
+    let yearFolderName = `${year} Sessions`;
 
     // Get the current year folder
-    chrome.bookmarks.search({ title: myTitle, "url": undefined }, function (results) {
+    browser.bookmarks.search({
+        title: yearFolderName,
+        "url": undefined
+    }, function (results) {
 
         if (results.length == 0) {
             // create current year folder
-            log("current year folder doesn't exist. Creating...")
+            log(`creating folder "${yearFolderName}"`);
 
-            chrome.bookmarks.create(
-                { "parentId": pastSessionsFolder.id, "title": myTitle },
+            browser.bookmarks.create({
+                    "parentId": pastSessionsFolder.id,
+                    "title": yearFolderName
+                },
                 createSessionFolder
             );
-
         } else {
             createSessionFolder(results[0]);
         }
-
-    })
+    });
 
 }
 
@@ -152,20 +159,21 @@ function createYearFolder(pastSessionsFolder) {
 function start() {
 
     date = new Date();
+    let pastSessionsFolderName = "past sessions";
 
     // Get the past sessions folder
-    chrome.bookmarks.search({ title: "past sessions", "url": undefined }, function (results) {
-
-        // for(var i=0; i<results.length; i++) {
-        //     log(results[i].title);
-        // }
+    browser.bookmarks.search({
+        title: "past sessions",
+        "url": undefined
+    }, function (results) {
 
         if (results.length == 0) {
             // create past sessions folder
-            log("past sessions folder doesn't exist. Creating...")
+            log(`creating folder "${pastSessionsFolderName}"`);
 
-            chrome.bookmarks.create(
-                { "title": "past sessions" },
+            browser.bookmarks.create({
+                    "title": pastSessionsFolderName
+                },
                 createYearFolder
             );
 
@@ -173,12 +181,12 @@ function start() {
             createYearFolder(results[0]);
         }
 
-    })
+    });
 
 }
 
+var date;
+var bookmarkSessionButton = document.getElementById("bookmarkSessionButton");
+var loggingDiv = document.getElementById("loggingDiv");
 
-let saveSession = document.getElementById("saveSession");
-
-saveSession.addEventListener("click", start);
-
+bookmarkSessionButton.addEventListener("click", start);

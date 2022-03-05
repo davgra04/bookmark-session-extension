@@ -1,6 +1,6 @@
-save-past-session-chrome-extension
+bookmark-session-extension
 ==================================
 
-![](images/icon128.png "save-past-session-chrome-extension")
+!["bookmark-session-extension"](images/icon128.png)
 
-A simple Chrome extension for bookmarking all open tabs across windows in a "past sessions" bookmark folder.
+A simple browser extension for bookmarking the current browser session.
