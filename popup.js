@@ -1,5 +1,10 @@
 "use strict";
 
+// remain platform independent
+if (typeof browser === "undefined") {
+    var browser = chrome;
+}
+
 
 function formattedDate(date) {
     let dayStr = String(date.getDate()).padStart(2, "0");

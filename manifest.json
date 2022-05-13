@@ -6,7 +6,7 @@
     "tabs",
     "bookmarks"
   ],
-  "browser_action": {
+  "action": {
     "default_title": "Bookmark Session",
     "default_popup": "popup.html",
     "default_icon": {
@@ -22,11 +22,14 @@
     "48": "images/icon48.png",
     "128": "images/icon128.png"
   },
-  "manifest_version": 2,
+  "manifest_version": 3,
   "web_accessible_resources": [
-    "images/icon16.png",
-    "images/icon32.png",
-    "images/icon48.png",
-    "images/icon128.png"
+    {
+      "resources": [ "images/*" ],
+      "matches": [],
+      "extension_ids": [ "efmojdffeapdcehobpblldgmmmmohhcm" ]
+    }
   ]
+
+
 }
